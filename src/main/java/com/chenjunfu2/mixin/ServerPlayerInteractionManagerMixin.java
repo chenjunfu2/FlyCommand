@@ -1,5 +1,6 @@
 package com.chenjunfu2.mixin;
 
+import com.chenjunfu2.FlyPlayerDataManager;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Final;
@@ -10,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.world.GameMode;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 
-import static com.chenjunfu2.Flycommand.flyPlayerList;
 import static net.minecraft.world.GameMode.CREATIVE;
 import static net.minecraft.world.GameMode.SPECTATOR;
 
@@ -39,7 +39,7 @@ public class ServerPlayerInteractionManagerMixin
 		}
 		else
 		{
-			if(!flyPlayerList.contains(currentPlayer.getUuid()))
+			if(! FlyPlayerDataManager.containsPlayer(currentPlayer.getUuid()))
 			{
 				abilities.allowFlying = false;
 				abilities.flying = false;
