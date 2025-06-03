@@ -7,6 +7,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -16,12 +17,8 @@ import net.minecraft.text.Text;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 
-import java.util.HashSet;
-import java.util.UUID;
-
 public class Flycommand implements ModInitializer
 {
-	public static HashSet<UUID> flyPlayerList = new HashSet<>();
 	public static MinecraftServer server;
 	
 	private enum OperationMode
@@ -30,6 +27,8 @@ public class Flycommand implements ModInitializer
 		ENABLE,  // 强制开启
 		DISABLE  // 强制关闭
 	}
+	
+	public static long time = 0;
 	
 	public void onInitialize()
 	{
@@ -51,8 +50,27 @@ public class Flycommand implements ModInitializer
 		//});
 		
 		//注册服务器实例事件
-		ServerLifecycleEvents.SERVER_STARTED.register((server) -> Flycommand.server = server);
-		ServerLifecycleEvents.SERVER_STOPPING.register((server) -> Flycommand.server = null);
+		ServerLifecycleEvents.SERVER_STARTED.register(server ->
+		{
+			Flycommand.server = server;
+			FlyPlayerDataManager.initialize(server); // 初始化数据管理器
+		});
+		
+		ServerLifecycleEvents.SERVER_STOPPING.register(server ->
+		{
+			FlyPlayerDataManager.saveData(); // 保存数据
+			Flycommand.server = null;
+		});
+		
+		ServerTickEvents.END_SERVER_TICK.register(server ->
+		{
+			if(time++ >= 20*60*2)//20gt*60s*2m
+			{
+				time = 0;
+				FlyPlayerDataManager.saveData();//2分钟保存一次
+			}
+		});
+		
 	}
 	
 	//玩家加入后根据游戏模式判断是否开启飞行
@@ -69,11 +87,11 @@ public class Flycommand implements ModInitializer
 		{
 			if(player.getAbilities().allowFlying)
 			{
-				flyPlayerList.add(player.getUuid());
+				FlyPlayerDataManager.addPlayer(player.getUuid());
 			}
 			else
 			{
-				flyPlayerList.remove(player.getUuid());
+				FlyPlayerDataManager.removePlayer(player.getUuid());
 			}
 		}
 	}
@@ -87,37 +105,50 @@ public class Flycommand implements ModInitializer
 	
 	private void flyCMD(CommandDispatcher<ServerCommandSource> dispatcher)
 	{
-		LiteralArgumentBuilder<ServerCommandSource> flyCommand =
-			CommandManager.literal("fly")
+		LiteralArgumentBuilder<ServerCommandSource> flyCommand = CommandManager.literal("fly")
 				.requires(ServerCommandSource::isExecutedByPlayer)
 				.executes(context -> this.toggleFly(context, OperationMode.TOGGLE))
-					.then(CommandManager.literal("on")
-					.executes(context -> this.toggleFly(context, OperationMode.ENABLE)))
-					.then(CommandManager.literal("off"))
-					.executes(context -> this.toggleFly(context, OperationMode.DISABLE));
+					.then(CommandManager.literal("on").executes(context -> this.toggleFly(context, OperationMode.ENABLE)))
+					.then(CommandManager.literal("off").executes(context -> this.toggleFly(context, OperationMode.DISABLE)));
 		
 		dispatcher.register(flyCommand);
 	}
 	
 	private boolean isFly(ServerPlayerEntity player)
 	{
-		return player.getAbilities().allowFlying && flyPlayerList.contains(player.getUuid());
+		return player.getAbilities().allowFlying && FlyPlayerDataManager.containsPlayer(player.getUuid());
+	}
+	
+	private boolean allowSet(ServerPlayerEntity player)
+	{
+		var gamemode = player.interactionManager.getGameMode();
+		if(gamemode == GameMode.CREATIVE || gamemode == GameMode.SPECTATOR)//旁观或创造不会真的去影响飞行状态，仅记录
+		{
+			return false;
+		}
+		return true;
 	}
 	
 	private void onFly(ServerPlayerEntity player)
 	{
-		flyPlayerList.add(player.getUuid());
-		player.getAbilities().allowFlying = true;
-		player.getAbilities().flying = true;
-		player.sendAbilitiesUpdate();
+		FlyPlayerDataManager.addPlayer(player.getUuid());
+		if(allowSet(player))
+		{
+			player.getAbilities().allowFlying = true;
+			player.getAbilities().flying = true;
+			player.sendAbilitiesUpdate();
+		}
 	}
 	
 	private void offFly(ServerPlayerEntity player)
 	{
-		flyPlayerList.remove(player.getUuid());
-		player.getAbilities().allowFlying = false;
-		player.getAbilities().flying = false;
-		player.sendAbilitiesUpdate();
+		FlyPlayerDataManager.removePlayer(player.getUuid());
+		if(allowSet(player))
+		{
+			player.getAbilities().allowFlying = false;
+			player.getAbilities().flying = false;
+			player.sendAbilitiesUpdate();
+		}
 	}
 	
 	
@@ -143,7 +174,7 @@ public class Flycommand implements ModInitializer
 		}
 		else//(mode == OperationMode.TOGGLE) or OTHER
 		{
-			isFlyingEnabled = !isFly(player);//取反切换
+			isFlyingEnabled = isFly(player);
 		}
 		
 		if(isFlyingEnabled)
