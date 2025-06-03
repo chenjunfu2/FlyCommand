@@ -7,7 +7,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -27,8 +26,6 @@ public class Flycommand implements ModInitializer
 		ENABLE,  // 强制开启
 		DISABLE  // 强制关闭
 	}
-	
-	public static long time = 0;
 	
 	public void onInitialize()
 	{
@@ -58,19 +55,9 @@ public class Flycommand implements ModInitializer
 		
 		ServerLifecycleEvents.SERVER_STOPPING.register(server ->
 		{
-			FlyPlayerDataManager.saveData(); // 保存数据
+			FlyPlayerDataManager.saveData(); // 关闭保存数据
 			Flycommand.server = null;
 		});
-		
-		ServerTickEvents.END_SERVER_TICK.register(server ->
-		{
-			if(time++ >= 20*60*2)//20gt*60s*2m
-			{
-				time = 0;
-				FlyPlayerDataManager.saveData();//2分钟保存一次
-			}
-		});
-		
 	}
 	
 	//玩家加入后根据游戏模式判断是否开启飞行
@@ -83,16 +70,21 @@ public class Flycommand implements ModInitializer
 		
 		ServerPlayerEntity player = (ServerPlayerEntity)entity;
 		GameMode gamemode = player.interactionManager.getGameMode();
+		//虽然有数据文件保存，但是这样还是可以一定程度缓解意料之外的数据不同步情况
 		if(gamemode != GameMode.CREATIVE && gamemode != GameMode.SPECTATOR)
 		{
-			if(player.getAbilities().allowFlying)
+			if(FlyPlayerDataManager.containsPlayer(player.getUuid()))//先看看在不在里面
+			{
+				if(!player.getAbilities().allowFlying)//在里面但是状态不对，改一下
+				{
+					onFly(player);
+				}
+			}
+			else if(player.getAbilities().allowFlying)//不在里面，但是为允许飞行状态，加进去
 			{
 				FlyPlayerDataManager.addPlayer(player.getUuid());
 			}
-			else
-			{
-				FlyPlayerDataManager.removePlayer(player.getUuid());
-			}
+			//else ()//不在里面，也不是允许飞行状态，不处理
 		}
 	}
 	
@@ -185,9 +177,6 @@ public class Flycommand implements ModInitializer
 			offFly(player);
 		}
 		
-		//String message = isFlying ? "info.flycommand.fly_enabled" : "info.flycommand.fly_disabled";
-		//source.sendFeedback(() -> Text.translatable(message), false);
-		//因为此mod多用于服务端，使用语言文件客户端无法解释，遂删除翻译功能，后续考虑通过服务端命令修改语言
 		String message = isFlying ? "§aFlight enabled!" : "§cFlight disabled!";
 		source.sendFeedback(() -> Text.of(message), false);
 		

@@ -3,6 +3,7 @@
   "package": "com.chenjunfu2.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "MinecraftServerMixin",
     "PlayerEntityAccessor",
     "PlayerManagerMixin",
     "ServerPlayerEntityMixin",
