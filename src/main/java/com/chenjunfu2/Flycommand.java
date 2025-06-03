@@ -158,36 +158,35 @@ public class Flycommand implements ModInitializer
 		ServerPlayerEntity player = source.getPlayer();
 		if (player == null)
 		{
-			source.sendError(Text.literal("You must be a player to use this command!"));
 			return 0;
 		}
 		
-		boolean isFlyingEnabled;
+		boolean isFlying;
 		
 		if(mode == OperationMode.ENABLE)
 		{
-			isFlyingEnabled = true;
+			isFlying = true;
 		}
 		else if(mode == OperationMode.DISABLE)
 		{
-			isFlyingEnabled = false;
+			isFlying = false;
 		}
 		else//(mode == OperationMode.TOGGLE) or OTHER
 		{
-			isFlyingEnabled = isFly(player);
+			isFlying = !isFly(player);//取反切换状态
 		}
 		
-		if(isFlyingEnabled)
-		{
-			offFly(player);
-		}
-		else
+		if(isFlying)
 		{
 			onFly(player);
 		}
+		else
+		{
+			offFly(player);
+		}
 		
-		String message = isFlyingEnabled ? "Flight disabled!" : "Flight enabled!";
-		source.sendFeedback(() -> Text.of(message), false);
+		String message = isFlying ? "info.flycommand.fly_enabled" : "info.flycommand.fly_disabled";
+		source.sendFeedback(() -> Text.translatable(message), false);
 		
 		return 1;
 	}
