@@ -3,13 +3,12 @@
 	"id": "flycommand",
 	"version": "${version}",
 	"name": "flycommand",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Adds player flight with /fly command. Fixes flight state loss issues.",
 	"authors": [
-		"Me!"
+		"chenjunfu2"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/chenjunfu2/FlyCommand"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/flycommand/icon.png",
@@ -23,7 +22,7 @@
 		"flycommand.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.16.14",
+		"fabricloader": ">=0.16.10",
 		"minecraft": "~1.20.1",
 		"java": ">=17",
 		"fabric-api": "*"
