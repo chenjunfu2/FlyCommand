@@ -1,6 +1,5 @@
 package com.chenjunfu2.mixin;
 
-
 import com.chenjunfu2.FlyPlayerDataManager;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.server.MinecraftServer;
@@ -14,6 +13,6 @@ public class MinecraftServerMixin
 	@Inject(method = "saveAll", at = @At(value = "HEAD"))
 	public void inj(boolean suppressLogs, boolean flush, boolean force, CallbackInfoReturnable<Boolean> cir)
 	{
-		FlyPlayerDataManager.saveData();
+		FlyPlayerDataManager.saveData();//跟随服务器保存事件
 	}
 }

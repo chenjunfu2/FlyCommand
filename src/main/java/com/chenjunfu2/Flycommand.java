@@ -88,10 +88,10 @@ public class Flycommand implements ModInitializer
 		}
 	}
 	
-	private void playerLeave(Entity entity, ServerWorld world)
-	{
-		return;//不注册离开事件，方便玩家重进后仍能保留飞行状态
-	}
+	//private void playerLeave(Entity entity, ServerWorld world)
+	//{
+	//	return;//不注册离开事件，方便玩家重进后仍能保留飞行状态
+	//}
 	
 	
 	
@@ -114,11 +114,7 @@ public class Flycommand implements ModInitializer
 	private boolean allowSet(ServerPlayerEntity player)
 	{
 		var gamemode = player.interactionManager.getGameMode();
-		if(gamemode == GameMode.CREATIVE || gamemode == GameMode.SPECTATOR)//旁观或创造不会真的去影响飞行状态，仅记录
-		{
-			return false;
-		}
-		return true;
+		return gamemode != GameMode.CREATIVE && gamemode != GameMode.SPECTATOR;//旁观或创造不会真的去影响飞行状态，仅记录
 	}
 	
 	private void onFly(ServerPlayerEntity player)

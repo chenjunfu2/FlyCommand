@@ -7,7 +7,8 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(PlayerEntity.class)
-public interface PlayerEntityAccessor {
+public interface PlayerEntityAccessor//偷家成员访问器
+{
 	@Accessor("abilities")
 	PlayerAbilities getAbilities();
 	

@@ -19,7 +19,7 @@ import static net.minecraft.world.GameMode.SPECTATOR;
 public class ServerPlayerInteractionManagerMixin
 {
 	@Shadow @Final protected ServerPlayerEntity player;
-	
+	//设置游戏模式直接走自定义逻辑，飞行状态切换到生存继续保持，而不是改为false
 	@Redirect(method = "setGameMode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;setAbilities(Lnet/minecraft/entity/player/PlayerAbilities;)V"))
 	private void inj(GameMode instance, PlayerAbilities abilities)
 	{
@@ -50,9 +50,10 @@ public class ServerPlayerInteractionManagerMixin
 		}
 		
 		abilities.allowModifyWorld = !instance.isBlockBreakingRestricted();
-	}
+	}//以上代码都是麻将那边抄来的
 }
 
+//下面是曾经的尝试，直接注入指定位置，可惜无法判断玩家是不是列表里的，只能弃用
 /*
 @Mixin(GameMode.class)
 public class ExampleMixin {

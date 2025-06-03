@@ -12,22 +12,20 @@ import net.minecraft.entity.player.PlayerEntity;
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin
 {
-	@Shadow public abstract void sendAbilitiesUpdate();
-	
 	@Inject(method = "copyFrom",at = @At(value = "HEAD"))
-	public void inj(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci)
+	public void inj(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci)//玩家数据拷贝丢失修复
 	{
-		PlayerEntityAccessor accessor = (PlayerEntityAccessor)(PlayerEntity)(Object)this;
-		PlayerEntityAccessor oldAccessor = (PlayerEntityAccessor)(PlayerEntity)oldPlayer;
+		PlayerEntityAccessor accessor = (PlayerEntityAccessor)(Object)this;
+		PlayerEntityAccessor oldAccessor = (PlayerEntityAccessor)oldPlayer;
 		
-		accessor.setAbilities(oldAccessor.getAbilities());
+		accessor.setAbilities(oldAccessor.getAbilities());//绝了，麻将居然这都能忘掉
 	}
 	
 	@Inject(method = "teleport(Lnet/minecraft/server/world/ServerWorld;DDDFF)V",at = @At(value = "TAIL"))
-	public void inj2(ServerWorld targetWorld, double x, double y, double z, float yaw, float pitch, CallbackInfo ci)
+	public void inj2(ServerWorld targetWorld, double x, double y, double z, float yaw, float pitch, CallbackInfo ci)//甚至传送之后也忘记更新玩家数据
 	{
 		ServerPlayerEntity spe = (ServerPlayerEntity)(Object)this;
-		spe.sendAbilitiesUpdate();
+		spe.sendAbilitiesUpdate();//帮忙更新一下
 	}
 }
 

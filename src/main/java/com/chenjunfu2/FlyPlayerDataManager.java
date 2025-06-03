@@ -17,7 +17,7 @@ import java.util.UUID;
 
 import static com.chenjunfu2.Flycommand.server;
 
-public class FlyPlayerDataManager
+public class FlyPlayerDataManager//用来读写飞行状态玩家UUID配置的
 {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static Path dataFile;
