@@ -185,8 +185,11 @@ public class Flycommand implements ModInitializer
 			offFly(player);
 		}
 		
-		String message = isFlying ? "info.flycommand.fly_enabled" : "info.flycommand.fly_disabled";
-		source.sendFeedback(() -> Text.translatable(message), false);
+		//String message = isFlying ? "info.flycommand.fly_enabled" : "info.flycommand.fly_disabled";
+		//source.sendFeedback(() -> Text.translatable(message), false);
+		//因为此mod多用于服务端，使用语言文件客户端无法解释，遂删除翻译功能，后续考虑通过服务端命令修改语言
+		String message = isFlying ? "§aFlight enabled!" : "§cFlight disabled!";
+		source.sendFeedback(() -> Text.of(message), false);
 		
 		return 1;
 	}
