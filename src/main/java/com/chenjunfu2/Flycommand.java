@@ -143,7 +143,7 @@ public class Flycommand implements ModInitializer
 		}
 		else//(mode == OperationMode.TOGGLE) or OTHER
 		{
-			isFlyingEnabled = isFly(player);
+			isFlyingEnabled = !isFly(player);//取反切换
 		}
 		
 		if(isFlyingEnabled)
