@@ -1,9 +1,9 @@
 # FlyCommand
 一个允许玩家飞行的mod</br>
 该mod提供飞行命令</br>
-- /fly 切换模式
-- /fly on  强制开启
-- /fly off  强制关闭
+- /fly （切换模式）
+- /fly on  （强制开启）
+- /fly off  （强制关闭）
 
 目前只支持版本fabric-0.16.10-mc-1.20.1</br>
 修复了许多玩家信息丢失导致失去飞行状态的问题</br>
