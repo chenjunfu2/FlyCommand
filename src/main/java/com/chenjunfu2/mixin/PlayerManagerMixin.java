@@ -10,10 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
 @Mixin(PlayerManager.class)
-public class PlayerManagerMixin
+abstract class PlayerManagerMixin
 {
 	@Inject(method = "respawnPlayer", at = @At(value = "RETURN"))
-	public void inj(ServerPlayerEntity player, boolean alive, CallbackInfoReturnable<ServerPlayerEntity> cir, @Local(ordinal = 1) ServerPlayerEntity serverPlayerEntity)
+	private void inj(ServerPlayerEntity player, boolean alive, CallbackInfoReturnable<ServerPlayerEntity> cir, @Local(ordinal = 1) ServerPlayerEntity serverPlayerEntity)
 	{
 		serverPlayerEntity.sendAbilitiesUpdate();//重新生成玩家的时候刷新状态以同步数据
 	}

@@ -10,10 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.entity.player.PlayerEntity;
 
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin
+abstract class ServerPlayerEntityMixin
 {
 	@Inject(method = "copyFrom",at = @At(value = "HEAD"))
-	public void inj(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci)//玩家数据拷贝丢失修复
+	private void inj(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci)//玩家数据拷贝丢失修复
 	{
 		PlayerEntityAccessor accessor = (PlayerEntityAccessor)(Object)this;
 		PlayerEntityAccessor oldAccessor = (PlayerEntityAccessor)oldPlayer;
@@ -22,7 +22,7 @@ public abstract class ServerPlayerEntityMixin
 	}
 	
 	@Inject(method = "teleport(Lnet/minecraft/server/world/ServerWorld;DDDFF)V",at = @At(value = "TAIL"))
-	public void inj2(ServerWorld targetWorld, double x, double y, double z, float yaw, float pitch, CallbackInfo ci)//甚至传送之后也忘记更新玩家数据
+	private void inj2(ServerWorld targetWorld, double x, double y, double z, float yaw, float pitch, CallbackInfo ci)//甚至传送之后也忘记更新玩家数据
 	{
 		ServerPlayerEntity spe = (ServerPlayerEntity)(Object)this;
 		spe.sendAbilitiesUpdate();//帮忙更新一下

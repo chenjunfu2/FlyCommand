@@ -16,7 +16,7 @@ import static net.minecraft.world.GameMode.SPECTATOR;
 
 
 @Mixin(ServerPlayerInteractionManager.class)
-public class ServerPlayerInteractionManagerMixin
+abstract class ServerPlayerInteractionManagerMixin
 {
 	@Shadow @Final protected ServerPlayerEntity player;
 	//设置游戏模式直接走自定义逻辑，飞行状态切换到生存继续保持，而不是改为false
