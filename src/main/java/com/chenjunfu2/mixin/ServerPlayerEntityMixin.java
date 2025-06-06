@@ -3,11 +3,9 @@ package com.chenjunfu2.mixin;
 import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.server.network.ServerPlayerEntity;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import net.minecraft.entity.player.PlayerEntity;
 
 @Mixin(ServerPlayerEntity.class)
 abstract class ServerPlayerEntityMixin
@@ -15,7 +13,7 @@ abstract class ServerPlayerEntityMixin
 	@Inject(method = "copyFrom",at = @At(value = "HEAD"))
 	private void inj(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci)//玩家数据拷贝丢失修复
 	{
-		PlayerEntityAccessor accessor = (PlayerEntityAccessor)(Object)this;
+		PlayerEntityAccessor accessor = (PlayerEntityAccessor)this;
 		PlayerEntityAccessor oldAccessor = (PlayerEntityAccessor)oldPlayer;
 		
 		accessor.setAbilities(oldAccessor.getAbilities());//绝了，麻将居然这都能忘掉
