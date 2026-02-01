@@ -11,9 +11,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.world.GameMode;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 
-import static net.minecraft.world.GameMode.CREATIVE;
-import static net.minecraft.world.GameMode.SPECTATOR;
-
 
 @Mixin(ServerPlayerInteractionManager.class)
 abstract class ServerPlayerInteractionManagerMixin
@@ -25,13 +22,13 @@ abstract class ServerPlayerInteractionManagerMixin
 	@Redirect(method = "setGameMode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;setAbilities(Lnet/minecraft/entity/player/PlayerAbilities;)V"))
 	private void inj(GameMode instance, PlayerAbilities abilities)
 	{
-		if (instance == CREATIVE)
+		if (instance == GameMode.CREATIVE)
 		{
 			abilities.allowFlying = true;
 			abilities.creativeMode = true;
 			abilities.invulnerable = true;
 		}
-		else if (instance == SPECTATOR)
+		else if (instance == GameMode.SPECTATOR)
 		{
 			abilities.allowFlying = true;
 			abilities.creativeMode = false;
