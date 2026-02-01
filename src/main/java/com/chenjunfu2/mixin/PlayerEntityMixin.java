@@ -81,7 +81,7 @@ abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 		boolean allowFlying = original.call(instance);//this.abilities.allowFlying
 		
 		//如果玩家没有开启飞行命令，返回原始值
-		if (!flyCommandOn)
+		if (!this.flyCommandOn)
 		{
 			return allowFlying;
 		}
