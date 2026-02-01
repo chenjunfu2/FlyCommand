@@ -1,5 +1,6 @@
 package com.chenjunfu2.mixin;
 
+import com.chenjunfu2.api.PlayerEntityMixinExtension;
 import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -13,10 +14,17 @@ abstract class ServerPlayerEntityMixin
 	@Inject(method = "copyFrom", at = @At(value = "HEAD"))
 	private void inj(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci)//玩家数据拷贝丢失修复
 	{
-		PlayerEntityAccessor accessor = (PlayerEntityAccessor)this;
+		PlayerEntityAccessor newAccessor = (PlayerEntityAccessor)this;
 		PlayerEntityAccessor oldAccessor = (PlayerEntityAccessor)oldPlayer;
 		
-		accessor.setAbilities(oldAccessor.getAbilities());//绝了，麻将居然这都能忘掉
+		newAccessor.setAbilities(oldAccessor.getAbilities());//绝了，麻将居然这都能忘掉
+		
+		//细节拷贝mod数据
+		PlayerEntityMixinExtension newModData = (PlayerEntityMixinExtension)this;
+		PlayerEntityMixinExtension oldModData = (PlayerEntityMixinExtension)oldPlayer;
+		
+		newModData.flycommand_1_20_1$SetFlyCommandOn(oldModData.flycommand_1_20_1$GetFlyCommandOn());
+		newModData.flycommand_1_20_1$SetLastFly(oldModData.flycommand_1_20_1$GetLastFly());
 	}
 	
 	@Inject(method = "teleport(Lnet/minecraft/server/world/ServerWorld;DDDFF)V", at = @At(value = "RETURN"))

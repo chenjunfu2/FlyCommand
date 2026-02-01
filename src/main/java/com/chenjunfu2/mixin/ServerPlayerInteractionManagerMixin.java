@@ -37,6 +37,7 @@ abstract class ServerPlayerInteractionManagerMixin
 			abilities.creativeMode = false;
 			abilities.invulnerable = true;
 			abilities.flying = true;
+			((PlayerEntityMixinExtension)this.player).flycommand_1_20_1$SetLastFly(true);//因为旁观模式强制飞行，所以手动设置
 		}
 		else
 		{

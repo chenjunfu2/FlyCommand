@@ -14,5 +14,5 @@ public interface PlayerEntityMixinExtension
 	boolean flycommand_1_20_1$GetLastFly();
 	
 	@Unique
-	public void flycommand_1_20_1$SetLastFly(boolean lastFly);
+	void flycommand_1_20_1$SetLastFly(boolean lastFly);
 }
