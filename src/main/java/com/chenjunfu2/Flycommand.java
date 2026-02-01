@@ -6,21 +6,14 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 
 public class Flycommand implements ModInitializer
 {
-	public static MinecraftServer server;
-	
 	private enum OperationMode
 	{
 		TOGGLE,  // 切换模式（默认）
@@ -34,65 +27,7 @@ public class Flycommand implements ModInitializer
 		{
 			flyCMD(dispatcher);
 		});
-		
-		//注册玩家加入事件
-		//ServerEntityEvents.ENTITY_LOAD.register((entity, world) ->
-		//{
-		//	playerJoin(entity, world);
-		//});
-		
-		//注册玩家离开事件
-		//ServerEntityEvents.ENTITY_UNLOAD.register((entity, world) ->
-		//{
-		//	playerLeave(entity,world);
-		//});
-		
-		//注册服务器实例事件
-		//ServerLifecycleEvents.SERVER_STARTED.register(server ->
-		//{
-		//	Flycommand.server = server;
-		//});
-		//
-		//ServerLifecycleEvents.SERVER_STOPPING.register(server ->
-		//{
-		//	Flycommand.server = null;
-		//});
 	}
-	
-	//玩家加入后根据游戏模式判断是否开启飞行
-	//private void playerJoin(Entity entity, ServerWorld world)
-	//{
-	//	if(!entity.isPlayer())
-	//	{
-	//		return;
-	//	}
-	//
-	//	ServerPlayerEntity player = (ServerPlayerEntity)entity;
-	//	GameMode gamemode = player.interactionManager.getGameMode();
-	//	//虽然有数据文件保存，但是这样还是可以一定程度缓解意料之外的数据不同步情况
-	//	if(gamemode != GameMode.CREATIVE && gamemode != GameMode.SPECTATOR)
-	//	{
-	//		if(FlyPlayerDataManager.containsPlayer(player.getUuid()))//先看看在不在里面
-	//		{
-	//			if(!player.getAbilities().allowFlying)//在里面但是状态不对，改一下
-	//			{
-	//				onFly(player);
-	//			}
-	//		}
-	//		else if(player.getAbilities().allowFlying)//不在里面，但是为允许飞行状态，加进去
-	//		{
-	//			FlyPlayerDataManager.addPlayer(player.getUuid());
-	//		}
-	//		//else ()//不在里面，也不是允许飞行状态，不处理
-	//	}
-	//}
-	
-	//private void playerLeave(Entity entity, ServerWorld world)
-	//{
-	//	return;//不注册离开事件，方便玩家重进后仍能保留飞行状态
-	//}
-	
-	
 	
 	private void flyCMD(CommandDispatcher<ServerCommandSource> dispatcher)
 	{
