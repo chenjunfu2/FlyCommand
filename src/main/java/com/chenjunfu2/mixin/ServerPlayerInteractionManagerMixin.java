@@ -20,7 +20,7 @@ abstract class ServerPlayerInteractionManagerMixin
 	//这里因为麻将代码中切换游戏模式是由gamemode类的setGameMode设置的，而这个类既不包含playerEntity，
 	//方法setGameMode也无法看见外部的对象，所以只能直接抄过来代码进行方法强制替换
 	@Redirect(method = "setGameMode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;setAbilities(Lnet/minecraft/entity/player/PlayerAbilities;)V"))
-	private void inj(GameMode instance, PlayerAbilities abilities)
+	private void setGameModeRedirect(GameMode instance, PlayerAbilities abilities)
 	{
 		if (instance == GameMode.CREATIVE)
 		{
