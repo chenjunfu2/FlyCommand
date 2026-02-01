@@ -1,8 +1,13 @@
 package com.chenjunfu2.mixin;
 
 import com.chenjunfu2.api.PlayerEntityMixinExtension;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.GameMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -63,4 +68,42 @@ abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 		
 		nbt.put("FlyCommandModData", modCompoundData);
 	}
+	
+	//这个方法只会在落地后调用，落地后先判断是否应该受到伤害，然后设置lastFly为false
+	@WrapOperation(method = "handleFallDamage", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerAbilities;allowFlying:Z"))
+	private boolean handleFallDamageWrapOperation(PlayerAbilities instance, Operation<Boolean> original)
+	{
+		//先保存，然后清空（因为此处调用代表玩家落地后计算伤害，那么必然设置为false，true则由玩家起飞过程设定）
+		boolean canImmuneFallDamage = this.lastFly;
+		this.lastFly = false;
+		
+		//获取原始值
+		boolean allowFlying = original.call(instance);//this.abilities.allowFlying
+		
+		//如果玩家没有开启飞行命令，返回原始值
+		if (!flyCommandOn)
+		{
+			return allowFlying;
+		}
+		
+		//不是服务器，返回原始值
+		if(!((PlayerEntity)(Object)this instanceof ServerPlayerEntity))
+		{
+			return allowFlying;
+		}
+		
+		//获取游戏模式
+		GameMode curGamemode = ((ServerPlayerEntity)(Object)this).interactionManager.getGameMode();
+		
+		//如果是创造、旁观，则跳过
+		if (curGamemode == GameMode.CREATIVE || curGamemode == GameMode.SPECTATOR)
+		{
+			return allowFlying;
+		}
+		
+		//否则是生存、冒险，
+		//那么如果canImmuneFallDamage是true，刚退出飞行状态，则免疫一次，否则强制受到伤害，哪怕allowFlying是true
+		return canImmuneFallDamage;
+	}
+	
 }
