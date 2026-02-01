@@ -1,6 +1,6 @@
 package com.chenjunfu2.mixin;
 
-import com.chenjunfu2.FlyPlayerDataManager;
+import com.chenjunfu2.api.PlayerEntityMixinExtension;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Final;
@@ -20,10 +20,11 @@ abstract class ServerPlayerInteractionManagerMixin
 {
 	@Shadow @Final protected ServerPlayerEntity player;
 	//设置游戏模式直接走自定义逻辑，飞行状态切换到生存继续保持，而不是改为false
+	//这里因为麻将代码中切换游戏模式是由gamemode类的setGameMode设置的，而这个类既不包含playerEntity，
+	//方法setGameMode也无法看见外部的对象，所以只能直接抄过来代码进行方法强制替换
 	@Redirect(method = "setGameMode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;setAbilities(Lnet/minecraft/entity/player/PlayerAbilities;)V"))
 	private void inj(GameMode instance, PlayerAbilities abilities)
 	{
-		ServerPlayerEntity currentPlayer = this.player;
 		if (instance == CREATIVE)
 		{
 			abilities.allowFlying = true;
@@ -39,7 +40,7 @@ abstract class ServerPlayerInteractionManagerMixin
 		}
 		else
 		{
-			if(! FlyPlayerDataManager.containsPlayer(currentPlayer.getUuid()))
+			if(!((PlayerEntityMixinExtension)this.player).flycommand_1_20_1$GetFlyCommandOn())
 			{
 				abilities.allowFlying = false;
 				abilities.flying = false;
@@ -50,36 +51,5 @@ abstract class ServerPlayerInteractionManagerMixin
 		}
 		
 		abilities.allowModifyWorld = !instance.isBlockBreakingRestricted();
-	}//以上代码都是麻将那边抄来的
-}
-
-//下面是曾经的尝试，直接注入指定位置，可惜无法判断玩家是不是列表里的，只能弃用
-/*
-@Mixin(GameMode.class)
-public class ExampleMixin {
-	@Redirect(
-			method = "setAbilities",
-			at = @At(
-					value = "FIELD",
-					target = "Lnet/minecraft/entity/player/PlayerAbilities;allowFlying:Z",
-					ordinal = 2  // 定位第3个allowFlying赋值操作
-			)
-	)
-	private void redirectAllowFlying(PlayerAbilities abilities, boolean value) {
-		//GameMode self = (GameMode)(Object)this;
-	}
-	
-	// 拦截flying字段赋值
-	@Redirect(
-			method = "setAbilities",
-			at = @At(
-					value = "FIELD",
-					target = "Lnet/minecraft/entity/player/PlayerAbilities;flying:Z",
-					ordinal = 1
-			)
-	)
-	private void redirectFlying(PlayerAbilities abilities, boolean value) {
-		//GameMode self = (GameMode)(Object)this;
 	}
 }
-*/

@@ -1,5 +1,6 @@
 package com.chenjunfu2;
 
+import com.chenjunfu2.api.PlayerEntityMixinExtension;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -35,10 +36,10 @@ public class Flycommand implements ModInitializer
 		});
 		
 		//注册玩家加入事件
-		ServerEntityEvents.ENTITY_LOAD.register((entity, world) ->
-		{
-			playerJoin(entity, world);
-		});
+		//ServerEntityEvents.ENTITY_LOAD.register((entity, world) ->
+		//{
+		//	playerJoin(entity, world);
+		//});
 		
 		//注册玩家离开事件
 		//ServerEntityEvents.ENTITY_UNLOAD.register((entity, world) ->
@@ -47,46 +48,44 @@ public class Flycommand implements ModInitializer
 		//});
 		
 		//注册服务器实例事件
-		ServerLifecycleEvents.SERVER_STARTED.register(server ->
-		{
-			Flycommand.server = server;
-			FlyPlayerDataManager.initialize(server); // 初始化数据管理器
-		});
-		
-		ServerLifecycleEvents.SERVER_STOPPING.register(server ->
-		{
-			FlyPlayerDataManager.saveData(); // 关闭保存数据
-			Flycommand.server = null;
-		});
+		//ServerLifecycleEvents.SERVER_STARTED.register(server ->
+		//{
+		//	Flycommand.server = server;
+		//});
+		//
+		//ServerLifecycleEvents.SERVER_STOPPING.register(server ->
+		//{
+		//	Flycommand.server = null;
+		//});
 	}
 	
 	//玩家加入后根据游戏模式判断是否开启飞行
-	private void playerJoin(Entity entity, ServerWorld world)
-	{
-		if(!entity.isPlayer())
-		{
-			return;
-		}
-		
-		ServerPlayerEntity player = (ServerPlayerEntity)entity;
-		GameMode gamemode = player.interactionManager.getGameMode();
-		//虽然有数据文件保存，但是这样还是可以一定程度缓解意料之外的数据不同步情况
-		if(gamemode != GameMode.CREATIVE && gamemode != GameMode.SPECTATOR)
-		{
-			if(FlyPlayerDataManager.containsPlayer(player.getUuid()))//先看看在不在里面
-			{
-				if(!player.getAbilities().allowFlying)//在里面但是状态不对，改一下
-				{
-					onFly(player);
-				}
-			}
-			else if(player.getAbilities().allowFlying)//不在里面，但是为允许飞行状态，加进去
-			{
-				FlyPlayerDataManager.addPlayer(player.getUuid());
-			}
-			//else ()//不在里面，也不是允许飞行状态，不处理
-		}
-	}
+	//private void playerJoin(Entity entity, ServerWorld world)
+	//{
+	//	if(!entity.isPlayer())
+	//	{
+	//		return;
+	//	}
+	//
+	//	ServerPlayerEntity player = (ServerPlayerEntity)entity;
+	//	GameMode gamemode = player.interactionManager.getGameMode();
+	//	//虽然有数据文件保存，但是这样还是可以一定程度缓解意料之外的数据不同步情况
+	//	if(gamemode != GameMode.CREATIVE && gamemode != GameMode.SPECTATOR)
+	//	{
+	//		if(FlyPlayerDataManager.containsPlayer(player.getUuid()))//先看看在不在里面
+	//		{
+	//			if(!player.getAbilities().allowFlying)//在里面但是状态不对，改一下
+	//			{
+	//				onFly(player);
+	//			}
+	//		}
+	//		else if(player.getAbilities().allowFlying)//不在里面，但是为允许飞行状态，加进去
+	//		{
+	//			FlyPlayerDataManager.addPlayer(player.getUuid());
+	//		}
+	//		//else ()//不在里面，也不是允许飞行状态，不处理
+	//	}
+	//}
 	
 	//private void playerLeave(Entity entity, ServerWorld world)
 	//{
@@ -108,7 +107,7 @@ public class Flycommand implements ModInitializer
 	
 	private boolean isFly(ServerPlayerEntity player)
 	{
-		return player.getAbilities().allowFlying && FlyPlayerDataManager.containsPlayer(player.getUuid());
+		return player.getAbilities().allowFlying && ((PlayerEntityMixinExtension)player).flycommand_1_20_1$GetFlyCommandOn();
 	}
 	
 	private boolean allowSet(ServerPlayerEntity player)
@@ -119,7 +118,7 @@ public class Flycommand implements ModInitializer
 	
 	private void onFly(ServerPlayerEntity player)
 	{
-		FlyPlayerDataManager.addPlayer(player.getUuid());
+		((PlayerEntityMixinExtension)player).flycommand_1_20_1$SetFlyCommandOn(true);
 		if(allowSet(player))
 		{
 			player.getAbilities().allowFlying = true;
@@ -130,7 +129,7 @@ public class Flycommand implements ModInitializer
 	
 	private void offFly(ServerPlayerEntity player)
 	{
-		FlyPlayerDataManager.removePlayer(player.getUuid());
+		((PlayerEntityMixinExtension)player).flycommand_1_20_1$SetFlyCommandOn(false);
 		if(allowSet(player))
 		{
 			player.getAbilities().allowFlying = false;

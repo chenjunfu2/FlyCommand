@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerEntity.class)
-public abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
+abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 {
 	//新增字段：玩家是否开启飞行命令
 	@Unique private boolean flyCommandOn = false;
@@ -45,7 +45,7 @@ public abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 		this.lastFly = lastFly;
 	}
 	
-	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
+	@Inject(method = "readCustomDataFromNbt", at = @At("RETURN"))
 	private void loadFlyCommandData(NbtCompound nbt, CallbackInfo ci)
 	{
 		NbtCompound modCompoundData = nbt.getCompound("FlyCommandModData");
@@ -54,12 +54,12 @@ public abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 		this.lastFly = modCompoundData.getBoolean("lastFly");
 	}
 	
-	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
+	@Inject(method = "writeCustomDataToNbt", at = @At("RETURN"))
 	private void saveFlyCommandData(NbtCompound nbt, CallbackInfo ci)
 	{
 		NbtCompound modCompoundData = new NbtCompound();
-		modCompoundData.putBoolean("flyCommandOn", flyCommandOn);
-		modCompoundData.putBoolean("lastFly", lastFly);
+		modCompoundData.putBoolean("flyCommandOn", this.flyCommandOn);
+		modCompoundData.putBoolean("lastFly", this.lastFly);
 		
 		nbt.put("FlyCommandModData", modCompoundData);
 	}
