@@ -106,4 +106,19 @@ abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 		return canImmuneFallDamage;
 	}
 	
+	//玩家在飞行状态，那么避免空中惩罚
+	//玩家不在飞行状态，但是最后一次飞行状态为true，也就是说明刚刚退出飞行状态，那么避免惩罚直到落地
+	@WrapOperation(method = "getBlockBreakingSpeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isOnGround()Z"))
+	public boolean getBlockBreakingSpeedWrapOperation(PlayerEntity player, Operation<Boolean> original)
+	{
+		//注意这个函数的返回值被条件反转
+		//也就是返回true跳过语句，避免惩罚
+		//返回false则进入语句，计算惩罚
+		if(this.flyCommandOn && this.lastFly)//this.lastFly 包含了 player.getAbilities().flying 情况
+		{
+			return true;
+		}
+		
+		return original.call(player);
+	}
 }
