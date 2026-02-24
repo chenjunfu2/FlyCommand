@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerPlayNetworkHandler.class)
 abstract class ServerPlayNetworkHandlerMixin
 {
-	@Inject(method = "onUpdatePlayerAbilities" , at = @At("RETURN"))
+	@Inject(method = "onUpdatePlayerAbilities" , at = @At(value = "RETURN"))
 	private void onUpdatePlayerAbilitiesInject(UpdatePlayerAbilitiesC2SPacket packet, CallbackInfo ci)
 	{
 		ServerPlayerEntity currentPlayer = ((ServerPlayNetworkHandler)(Object)this).player;

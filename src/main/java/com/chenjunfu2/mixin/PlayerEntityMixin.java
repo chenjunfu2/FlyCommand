@@ -50,7 +50,7 @@ abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 		this.lastFly = lastFly;
 	}
 	
-	@Inject(method = "readCustomDataFromNbt", at = @At("RETURN"))
+	@Inject(method = "readCustomDataFromNbt", at = @At(value = "RETURN"))
 	private void loadFlyCommandData(NbtCompound nbt, CallbackInfo ci)
 	{
 		NbtCompound modCompoundData = nbt.getCompound("FlyCommandModData");
@@ -59,7 +59,7 @@ abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 		this.lastFly = modCompoundData.getBoolean("lastFly");
 	}
 	
-	@Inject(method = "writeCustomDataToNbt", at = @At("RETURN"))
+	@Inject(method = "writeCustomDataToNbt", at = @At(value = "RETURN"))
 	private void saveFlyCommandData(NbtCompound nbt, CallbackInfo ci)
 	{
 		NbtCompound modCompoundData = new NbtCompound();
