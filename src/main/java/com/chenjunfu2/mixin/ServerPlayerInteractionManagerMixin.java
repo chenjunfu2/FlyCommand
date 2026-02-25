@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import net.minecraft.world.GameMode;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 
-
 @Mixin(ServerPlayerInteractionManager.class)
 abstract class ServerPlayerInteractionManagerMixin
 {
