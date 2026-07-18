@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Entity.class)
 abstract class EntityMixin
 {
+	//Client与Server共用逻辑
 	@Inject(
 		method = "fall",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onLanding()V", shift = At.Shift.BEFORE)

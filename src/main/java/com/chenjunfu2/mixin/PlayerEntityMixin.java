@@ -87,13 +87,13 @@ abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 		}
 		
 		//不是服务器，返回原始值
-		if(!((PlayerEntity)(Object)this instanceof ServerPlayerEntity))
+		if(!((PlayerEntity)(Object)this instanceof ServerPlayerEntity serverPlayerEntity))
 		{
 			return allowFlying;
 		}
 		
 		//获取游戏模式
-		GameMode curGamemode = ((ServerPlayerEntity)(Object)this).interactionManager.getGameMode();
+		GameMode curGamemode = serverPlayerEntity.interactionManager.getGameMode();
 		
 		//如果是创造、旁观，则跳过
 		if (curGamemode == GameMode.CREATIVE || curGamemode == GameMode.SPECTATOR)
@@ -120,5 +120,17 @@ abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 		}
 		
 		return original.call(player);
+	}
+	
+	//Client与Server共用逻辑
+	@Inject(method = "tickMovement", at = @At(value = "HEAD"))
+	void tickMovementInject(CallbackInfo ci)
+	{
+		PlayerEntity currentPlayer = (PlayerEntity)(Object)this;
+		if(!currentPlayer.getAbilities().flying && //例外情况：玩家退出了飞行状态，并且玩家进入水里，那么设置为false
+			currentPlayer.isTouchingWater())
+		{
+			((PlayerEntityMixinExtension)currentPlayer).flycommand_1_20_1$SetLastFly(false);
+		}
 	}
 }
