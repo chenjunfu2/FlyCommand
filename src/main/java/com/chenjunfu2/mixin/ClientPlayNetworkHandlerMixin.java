@@ -31,11 +31,7 @@ public abstract class ClientPlayNetworkHandlerMixin
 		
 		GameMode clientGameMode = client.interactionManager.getCurrentGameMode();
 		((PlayerEntityMixinExtension)client.player).flycommand_1_20_1$SetFlyCommandOn(clientGameMode.isSurvivalLike() && client.player.getAbilities().allowFlying);
-		
-		if(client.player.getAbilities().flying)
-		{
-			((PlayerEntityMixinExtension)client.player).flycommand_1_20_1$SetLastFly(true);
-		}
+		((PlayerEntityMixinExtension)client.player).flycommand_1_20_1$SetLastFly(client.player.getAbilities().flying);
 	}
 	
 	@Inject(method = "onGameJoin", at = @At(value = "RETURN"))
@@ -48,12 +44,6 @@ public abstract class ClientPlayNetworkHandlerMixin
 		
 		GameMode clientGameMode = client.interactionManager.getCurrentGameMode();
 		((PlayerEntityMixinExtension)client.player).flycommand_1_20_1$SetFlyCommandOn(clientGameMode.isSurvivalLike() && client.player.getAbilities().allowFlying);
-		
-		if(client.player.getAbilities().flying)
-		{
-			((PlayerEntityMixinExtension)client.player).flycommand_1_20_1$SetLastFly(true);
-		}
-		
+		((PlayerEntityMixinExtension)client.player).flycommand_1_20_1$SetLastFly(client.player.getAbilities().flying);
 	}
-	
 }

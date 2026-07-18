@@ -20,5 +20,12 @@ abstract class ServerPlayNetworkHandlerMixin
 		{
 			((PlayerEntityMixinExtension)currentPlayer).flycommand_1_20_1$SetLastFly(true);
 		}
+		else//例外情况：玩家在水里，并且当前退出了飞行状态，那么立刻设置为false
+		{
+			if(currentPlayer.isTouchingWater())
+			{
+				((PlayerEntityMixinExtension)currentPlayer).flycommand_1_20_1$SetLastFly(false);
+			}
+		}
 	}
 }
