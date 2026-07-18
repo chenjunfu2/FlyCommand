@@ -2,7 +2,6 @@ package com.chenjunfu2.mixin;
 
 import com.chenjunfu2.api.PlayerEntityMixinExtension;
 import com.mojang.authlib.GameProfile;
-import com.mojang.logging.LogUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
@@ -11,7 +10,6 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -46,26 +44,21 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	
 	//替mojang实现一下fall方法复写基类
 	@Override
-	@Intrinsic(displace = true)//如果没有，则注入替换，如果有，则重命名原方法并替代原方法
+	@Intrinsic
 	protected void fall(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition)
 	{
 		super.fall(heightDifference,onGround,state,landedPosition);
+	}
+	
+	//Client逻辑
+	@SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference", "target"})
+	@Inject(method = "fall(DZLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V", at = @At(value = "RETURN"))//必须在返回之后，防止先取消状态再计算摔伤
+	void fallInject(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition, CallbackInfo info)
+	{
 		if(onGround)
 		{
 			//如果落地，那么取消上次飞行状态
 			((PlayerEntityMixinExtension)(PlayerEntity)(Object)this).flycommand_1_20_1$SetLastFly(false);
 		}
 	}
-	
-	//Client逻辑
-	//@SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference", "target"})
-	//@Inject(method = "fall", at = @At(value = "RETURN"))//必须在返回之后，防止先取消状态再计算摔伤
-	//void fallInject(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition, CallbackInfo info)
-	//{
-	//	if(onGround)
-	//	{
-	//		//如果落地，那么取消上次飞行状态
-	//		((PlayerEntityMixinExtension)(PlayerEntity)(Object)this).flycommand_1_20_1$SetLastFly(false);
-	//	}
-	//}
 }
