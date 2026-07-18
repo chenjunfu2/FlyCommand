@@ -1,9 +1,16 @@
 package com.chenjunfu2.mixin;
 
 import com.chenjunfu2.api.PlayerEntityMixinExtension;
+import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -11,8 +18,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ClientPlayerEntity.class)
-public abstract class ClientPlayerEntityMixin
+public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 {
+	public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile)
+	{
+		super(world, profile);
+	}
+	
 	@Inject(method = "sendAbilitiesUpdate", at = @At(value = "RETURN"))
 	void sendAbilitiesUpdateInject(CallbackInfo ci)
 	{
@@ -27,6 +39,26 @@ public abstract class ClientPlayerEntityMixin
 			{
 				((PlayerEntityMixinExtension)currentPlayer).flycommand_1_20_1$SetLastFly(false);
 			}
+		}
+	}
+	
+	//替mojang实现一下fall方法复写基类
+	@Override
+	@Intrinsic
+	public void fall(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition)
+	{
+		super.fall(heightDifference,onGround,state,landedPosition);
+	}
+	
+	//Client逻辑
+	@SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference", "target"})
+	@Inject(method = "fall", at = @At(value = "RETURN"))//必须在返回之后，防止先取消状态再计算摔伤
+	void fallInject(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition, CallbackInfo info)
+	{
+		if(onGround)
+		{
+			//如果落地，那么取消上次飞行状态
+			((PlayerEntityMixinExtension)(PlayerEntity)(Object)this).flycommand_1_20_1$SetLastFly(false);
 		}
 	}
 }

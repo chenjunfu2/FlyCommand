@@ -1,7 +1,12 @@
 package com.chenjunfu2.mixin;
 
 import com.chenjunfu2.api.PlayerEntityMixinExtension;
+import com.mojang.authlib.GameProfile;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,6 +37,26 @@ abstract class ServerPlayerEntityMixin
 	{
 		ServerPlayerEntity spe = (ServerPlayerEntity)(Object)this;
 		spe.sendAbilitiesUpdate();//帮忙更新一下
+	}
+	
+	//Server逻辑
+	@Inject
+	(
+		method = "handleFall",
+		at = @At
+		(
+			value = "INVOKE",
+			shift = At.Shift.AFTER,
+			target = "Lnet/minecraft/entity/player/PlayerEntity;fall(DZLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V"
+		)
+	)//必须在返回之后，防止先取消状态再计算摔伤
+	void handleFallInject(double xDifference, double yDifference, double zDifference, boolean onGround, CallbackInfo ci)
+	{
+		if(onGround)
+		{
+			//如果落地，那么取消上次飞行状态
+			((PlayerEntityMixinExtension)(PlayerEntity)(Object)this).flycommand_1_20_1$SetLastFly(false);
+		}
 	}
 }
 

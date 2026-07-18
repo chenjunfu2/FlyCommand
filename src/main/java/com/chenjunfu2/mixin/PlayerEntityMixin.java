@@ -3,17 +3,11 @@ package com.chenjunfu2.mixin;
 import com.chenjunfu2.api.PlayerEntityMixinExtension;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
-import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,17 +15,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerEntity.class)
-abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityMixinExtension
+abstract class PlayerEntityMixin implements PlayerEntityMixinExtension
 {
 	//新增字段：玩家是否开启飞行命令
 	@Unique private boolean flyCommandOn = false;
 	//新增字段：玩家刚才是否在飞行
 	@Unique private boolean lastFly = false;
-	
-	protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world)
-	{
-		super(entityType, world);
-	}
 	
 	@Unique
 	@Override
@@ -145,25 +134,4 @@ abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityMix
 			((PlayerEntityMixinExtension)currentPlayer).flycommand_1_20_1$SetLastFly(false);
 		}
 	}
-	
-	//替mojang实现一下fall方法复写基类
-	@Override
-	@Intrinsic
-	protected void fall(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition)//Client与Server共用逻辑
-	{
-		super.fall(heightDifference,onGround,state,landedPosition);
-	}
-	
-	//Client与Server共用逻辑
-	@SuppressWarnings({"MixinAnnotationTarget", "UnresolvedMixinReference", "target"})
-	@Inject(method = "fall", at = @At(value = "RETURN"))//必须在返回之后，防止先取消状态再计算摔伤
-	void fallInject(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition, CallbackInfo info)
-	{
-		if(onGround)
-		{
-			//如果落地，那么取消上次飞行状态
-			((PlayerEntityMixinExtension)(PlayerEntity)(Object)this).flycommand_1_20_1$SetLastFly(false);
-		}
-	}
-	
 }
